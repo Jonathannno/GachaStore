@@ -4,19 +4,23 @@ RUN yum install -y findutils
 WORKDIR /app
 COPY . .
 
-# 1. Manually create the package folder structure
-RUN mkdir -p web/WEB-INF/classes/controller
+# 1. Create a folder named ROOT (Tomcat's favorite name)
+RUN mkdir -p ROOT/WEB-INF/classes
 
-# 2. Compile specifically into that folder
-# We use -d web/WEB-INF/classes so javac handles the 'controller' subfolder automatically
+# 2. Copy your UI files into ROOT
+RUN cp -r web/* ROOT/
+
+# 3. Compile your Java into the ROOT classes folder
 RUN find src -name "*.java" > sources.txt && \
-    javac -d web/WEB-INF/classes -cp "web/WEB-INF/lib/*:lib/*" @sources.txt
+    javac -d ROOT/WEB-INF/classes -cp "web/WEB-INF/lib/*:lib/*" @sources.txt
 
-# 3. Verify the file exists (This will show in your Railway logs)
-RUN ls -R web/WEB-INF/classes
+# 4. List the files to be 100% sure they exist (Check logs for this!)
+RUN ls -R ROOT/WEB-INF/classes
 
-# 4. Get the runner
+# 5. Download the runner
 RUN curl -L https://repo1.maven.org/maven2/com/heroku/webapp-runner/9.0.52.1/webapp-runner-9.0.52.1.jar -o webapp-runner.jar
 
 EXPOSE 8080
-CMD ["java", "-jar", "webapp-runner.jar", "--port", "8080", "web/"]
+
+# 6. Run the ROOT folder
+CMD ["java", "-jar", "webapp-runner.jar", "--port", "8080", "ROOT/"]
