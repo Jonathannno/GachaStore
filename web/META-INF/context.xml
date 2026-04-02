@@ -2,7 +2,6 @@
     <servlet-name>LoginServlet</servlet-name>
     <servlet-class>controller.LoginServlet</servlet-class>
 </servlet>
-
 <servlet-mapping>
     <servlet-name>LoginServlet</servlet-name>
     <url-pattern>/LoginServlet</url-pattern>
