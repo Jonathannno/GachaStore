@@ -3,19 +3,19 @@ RUN yum install -y findutils
 
 WORKDIR /app
 
-# This line 'breaks' the cache so Railway is forced to rebuild
-ARG CACHE_BUST=2026-04-02-16-00
+# Keeps the cache broken to ensure a fresh compile
+ARG CACHE_BUST=2026-04-02-16-15
 COPY . .
 
 # 1. Create the ROOT structure
 RUN rm -rf ROOT && mkdir -p ROOT/WEB-INF/classes
 
-# 2. Copy UI files (Using a wild card to ensure it sees the folder)
+# 2. Copy UI files
 RUN cp -r web/* ROOT/
 
-# 3. COMPILE - This is the most important part
+# 3. COMPILE - Removed the invalid -v flag
 RUN find src -name "*.java" > sources.txt && \
-    javac -v -d ROOT/WEB-INF/classes -cp "web/WEB-INF/lib/*:lib/*" @sources.txt
+    javac -d ROOT/WEB-INF/classes -cp "web/WEB-INF/lib/*:lib/*:ROOT/WEB-INF/lib/*" @sources.txt
 
 # 4. PROOF - This will print the files in your build logs
 RUN echo "--- VERIFYING COMPILED FILES ---" && ls -R ROOT/WEB-INF/classes
