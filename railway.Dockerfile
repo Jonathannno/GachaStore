@@ -1,24 +1,23 @@
-# FORCE_REBUILD_TIMESTAMP: 2026-04-02-23-00
+# BUILD_VERSION_LIBS_FIX_01
 FROM amazoncorretto:11-al2-jdk
 RUN yum install -y findutils
 
 WORKDIR /app
 COPY . .
 
-# 1. This folder MUST be created for the 404 to go away
-RUN mkdir -p ROOT/WEB-INF/classes
+# 1. Prepare the folders
+RUN rm -rf ROOT && mkdir -p ROOT/WEB-INF/classes
 
-# 2. This copies your JSP/HTML files
-RUN cp -r web/* ROOT/
-
-# 3. THIS STEP MUST APPEAR IN YOUR LOGS
-RUN find src -name "*.java" > sources.txt && \
-    javac -d ROOT/WEB-INF/classes -cp "web/WEB-INF/lib/*:lib/*" @sources.txt
-
-# 4. Final verification - this will print to your logs
-RUN echo "CHECKING FOR CLASS FILE:" && ls -R ROOT/WEB-INF/classes
-
+# 2. Get the runner BEFORE compiling so we can use it as a library
 RUN curl -L https://repo1.maven.org/maven2/com/heroku/webapp-runner/9.0.52.1/webapp-runner-9.0.52.1.jar -o webapp-runner.jar
+
+# 3. COMPILE - We added 'webapp-runner.jar' to the classpath (-cp)
+# This fixes the "package javax.servlet does not exist" errors!
+RUN find src -name "*.java" > sources.txt && \
+    javac -d ROOT/WEB-INF/classes -cp "webapp-runner.jar:web/WEB-INF/lib/*:lib/*" @sources.txt
+
+# 4. Copy the rest of the website files
+RUN cp -r web/* ROOT/
 
 EXPOSE 8080
 CMD ["java", "-jar", "webapp-runner.jar", "--port", "8080", "ROOT/"]
