@@ -1,1 +1,1 @@
-web: npx servor web/ index.jsp 8080
+web: java -cp build/classes:lib/* Main
