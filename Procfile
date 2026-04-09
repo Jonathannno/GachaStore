@@ -1,1 +1,1 @@
-web: ./mvnw jetty:run -Djetty.port=$PORT
+web: java -jar target/ROOT.war --port=$PORT
