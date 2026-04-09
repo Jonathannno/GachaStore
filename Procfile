@@ -1,1 +1,1 @@
-web: mvn jetty:run -Djetty.port=$PORT
+web: ./mvnw jetty:run -Djetty.port=$PORT
